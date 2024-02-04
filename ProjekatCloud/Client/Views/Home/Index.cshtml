@@ -1,0 +1,25 @@
+﻿@using static Common.Korisnik
+@{
+    ViewData["Title"] = "Registracija";
+}
+
+<h1>Registracija</h1>
+
+<form action="/Home/Register" method="post">
+    <label>Ime</label>
+    <input type="text" name="Ime" />
+    <br />
+    <label>Prezime</label>
+    <input type="text" name="Prezime" />
+    <br />
+    <label>Email</label>
+    <input type="text" name="Email" />
+    <br />
+    <label>Lozinka</label>
+    <input type="text" name="Lozinka" />
+    <br />
+
+
+    <input type="submit" value="Registruj se" />
+</form>
+

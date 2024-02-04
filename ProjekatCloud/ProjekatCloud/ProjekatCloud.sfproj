@@ -36,6 +36,9 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Client\Client.csproj">
+      <ServiceLaunchUrl>http://localhost:{ServicePort}/swagger</ServiceLaunchUrl>
+    </ProjectReference>
     <ProjectReference Include="..\Validator\Validator.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
