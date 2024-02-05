@@ -1,25 +1,24 @@
-﻿@using static Common.Korisnik
-@{
-    ViewData["Title"] = "Registracija";
-}
+﻿<style>
+    .my-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid #3498db;
+        border-radius: 5px;
+        color: #ffffff;
+        background-color: #3498db;
+    }
 
-<h1>Registracija</h1>
+        .my-button:hover {
+            background-color: #2980b9;
+        }
+</style>
 
-<form action="/Home/Register" method="post">
-    <label>Ime</label>
-    <input type="text" name="Ime" />
-    <br />
-    <label>Prezime</label>
-    <input type="text" name="Prezime" />
-    <br />
-    <label>Email</label>
-    <input type="text" name="Email" />
-    <br />
-    <label>Lozinka</label>
-    <input type="text" name="Lozinka" />
-    <br />
-
-
-    <input type="submit" value="Registruj se" />
-</form>
-
+<h2>Dobrodošli u  Online Trgovinu</h2>
+<p>Izaberite jednu od opcija:</p>
+<br />
+<button onclick="location.href='@Url.Action("Register", "User")'" class="my-button">Registracija</button>
+<button onclick="location.href='@Url.Action("Login", "User")'" class="my-button">Prijavljivanje</button>

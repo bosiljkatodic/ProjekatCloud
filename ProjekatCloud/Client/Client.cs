@@ -11,6 +11,7 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
+using Common;
 
 namespace Client
 {
@@ -26,8 +27,10 @@ namespace Client
         /// <summary>
         /// Optional override to create listeners (like tcp, http) for this service instance.
         /// </summary>
-        /// <returns>The collection of listeners.</returns>
-        protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
+        /// 
+
+    /// <returns>The collection of listeners.</returns>
+    protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
             return new ServiceInstanceListener[]
             {
@@ -39,6 +42,7 @@ namespace Client
                         var builder = WebApplication.CreateBuilder();
 
                         builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
+
                         builder.WebHost
                                     .UseKestrel()
                                     .UseContentRoot(Directory.GetCurrentDirectory())
@@ -86,6 +90,17 @@ namespace Client
                         
                         app.MapControllers();
                         */
+                         // Dodajte middleware za redirekciju sa /swagger/index.html na /
+                        app.Use(async (context, next) =>
+                        {
+                            if (context.Request.Path.StartsWithSegments("/swagger/index.html"))
+                            {
+                                context.Response.Redirect("/");
+                                return;
+                            }
+
+                            await next();
+                        });
 
                         app.UseStaticFiles();
 

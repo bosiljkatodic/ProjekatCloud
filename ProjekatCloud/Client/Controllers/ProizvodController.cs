@@ -1,14 +1,12 @@
-﻿using Common;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Client.Controllers
 {
-    public class HomeController : Controller
+    public class ProizvodController : Controller
     {
         public IActionResult Index()
         {
             return View();
         }
-
     }
 }

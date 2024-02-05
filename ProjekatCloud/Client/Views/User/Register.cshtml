@@ -1,0 +1,43 @@
+﻿@model Common.Korisnik
+
+<h2>Registracija</h2>
+<hr />
+
+@using (Html.BeginForm("Register", "User", FormMethod.Post))
+{
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="Ime">Ime</label>
+
+        <input asp-for="Ime" name="Ime" class="form-control" />
+        <span asp-validation-for="Ime" class="text-danger"></span>
+    </div>
+    <br/>
+    <div class="form-group">
+        <label asp-for="Prezime">Prezime</label>
+        <input asp-for="Prezime" name="Prezime" class="form-control" />
+        <span asp-validation-for="Prezime" class="text-danger"></span>
+    </div>
+     <br/>
+    <div class="form-group">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" name="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="form-group">
+        <label asp-for="Lozinka">Lozinka</label>
+        <input asp-for="Lozinka" name="Lozinka" type="password" class="form-control" />
+        <span asp-validation-for="Lozinka" class="text-danger"></span>
+    </div>
+    <br />
+
+    <button type="submit" class="btn btn-primary">Registruj se</button>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
