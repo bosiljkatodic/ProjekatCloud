@@ -26,7 +26,7 @@ namespace UserStatefullService
 
                 KorisnikEntity korisnikEntity = new KorisnikEntity
                 {
-                    Id = korisnik.Id,
+                    //Id = korisnik.Id,
                     Ime = korisnik.Ime,
                     Prezime = korisnik.Prezime,
                     Email = korisnik.Email
@@ -38,7 +38,7 @@ namespace UserStatefullService
                 await korisniciTable.ExecuteAsync(insertOperation);
 
                 // Logovanje uspešnosti (opciono)
-                Console.WriteLine($"Dodat korisnik sa ID: {korisnik.Id} u tabelu Korisnici");
+              //  Console.WriteLine($"Dodat korisnik sa ID: {korisnik.Id} u tabelu Korisnici");
             }
             catch (Exception ex)
             {

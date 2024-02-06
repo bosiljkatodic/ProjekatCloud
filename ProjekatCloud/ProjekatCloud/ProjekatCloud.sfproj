@@ -40,6 +40,7 @@
     <ProjectReference Include="..\Client\Client.csproj">
       <ServiceLaunchUrl>http://localhost:{ServicePort}/swagger</ServiceLaunchUrl>
     </ProjectReference>
+    <ProjectReference Include="..\ProductStatefullService\ProductStatefullService.csproj" />
     <ProjectReference Include="..\UserStatefullService\UserStatefullService.csproj" />
     <ProjectReference Include="..\Validator\Validator.csproj" />
   </ItemGroup>

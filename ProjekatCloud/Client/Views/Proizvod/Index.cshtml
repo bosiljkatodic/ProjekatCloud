@@ -1,0 +1,107 @@
+﻿@model IEnumerable<IGrouping<string, Common.Proizvod>>
+
+@{
+    ViewData["Title"] = "Proizvodi";
+}
+
+<style>
+    nav {
+        margin-bottom: 20px;
+    }
+
+        nav form {
+            display: inline;
+            margin-right: 10px;
+        }
+
+    button {
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    .table-container {
+        margin-bottom: 20px;
+    }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th,
+        .table-container td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            width: 30px;
+        }
+
+        .table-container th {
+            background-color: #f2f2f2;
+            width: 30px;
+        }
+</style>
+
+<h1>Proizvodi</h1>
+
+<nav>
+    <form asp-controller="Proizvod" asp-action="Index">
+        <button type="submit" onclick="location.href='@Url.Action("Index", "Proizvod")'">Home</button>
+    </form>
+    <form asp-controller="User" asp-action="IzmeniProfil">
+        <button type="submit" onclick="location.href='@Url.Action("Edit", "User")'">Izmijeni Profil</button>
+    </form>
+    <form asp-controller="Proizvod" asp-action="LogOut">
+        <button type="submit" onclick="location.href='@Url.Action("LogOut", "Proizvod")'">Log Out</button>
+    </form>  
+</nav>
+
+@foreach (var grupa in Model)
+{
+     <div class="table-container">
+
+    <h2>@grupa.Key</h2> <!-- Prikaz kategorije -->
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Naziv</th>
+                <th>Opis</th>
+                <th>Cijena</th>
+                <th>Količina</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var proizvod in grupa)
+            {
+                <tr>
+                    <td>@proizvod.Id</td>
+                    <td>@proizvod.NazivProizvoda</td>
+                    <td>@proizvod.OpisProizvoda</td>
+                    <td>@proizvod.CijenaProizvoda</td>
+                    <td>@proizvod.KolicinaProizvoda</td>
+                    <td><button onclick="ubaciUKorpu('@proizvod.Id')">Ubaci u korpu</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+}
+
+<script>
+    function ubaciUKorpu(id) {
+        // Implementiraj logiku za ubacivanje proizvoda u korpu
+        // Možeš koristiti AJAX poziv ka serveru za smanjenje količine
+        // proizvoda u Reliable Dictionary-ju kada se proizvod ubaci u korpu
+    }
+</script>

@@ -17,7 +17,7 @@ namespace Common
             this.RowKey = Guid.NewGuid().ToString();
         }
 
-        public int Id { get; set; }
+       // public int Id { get; set; }
         public string Ime { get; set; }
         public string Prezime { get; set; }
         public string Email { get; set; }

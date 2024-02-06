@@ -23,6 +23,8 @@ namespace Common
         */
         [OperationContract]
         Task<bool> ValidateCredentials(string email, string password);
+        [OperationContract]
+        public Task<Korisnik> GetUserByEmail(string email);
 
     }
 }

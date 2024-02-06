@@ -43,6 +43,14 @@ namespace Client
 
                         builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
 
+                        builder.Services.AddSession(options =>
+                        {
+                            // Postavite trajanje sesije i druge opcije po potrebi
+                            options.IdleTimeout = TimeSpan.FromMinutes(30);
+                            options.Cookie.HttpOnly = true;
+                            options.Cookie.IsEssential = true;
+                        });
+
                         builder.WebHost
                                     .UseKestrel()
                                     .UseContentRoot(Directory.GetCurrentDirectory())
@@ -101,6 +109,8 @@ namespace Client
 
                             await next();
                         });
+                        
+                        app.UseSession();
 
                         app.UseStaticFiles();
 

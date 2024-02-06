@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using Common; // Uverite se da imate pravilan using za vašu Korisnik klasu
+using Common; 
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using System.Fabric;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using Microsoft.ServiceFabric.Services.Client;
 
 namespace Client.Controllers
 {
@@ -47,10 +49,10 @@ namespace Client.Controllers
 
                     if (result == "Uspjesno logovanje")
                     {
-                        // Uspela prijava - možete preusmeriti korisnika, postaviti sesiju, ili bilo šta drugo
+                    // Uspela prijava - možete preusmeriti korisnika, postaviti sesiju, ili bilo šta drugo
+                    HttpContext.Session.SetString("KorisnikEmail", loginViewModel.Email);
 
-                        return RedirectToAction("RegistrationSuccess"); //IZMIJENI!!!!!!
-
+                    return RedirectToAction("Index", "Proizvod");
                     }
                     else
                     {
@@ -86,10 +88,12 @@ namespace Client.Controllers
 
                     if (result == "Uspjesna registracija")
                     {
-                        // Uspesna registracija - možete preusmeriti korisnika, prikazati poruku, ili bilo šta drugo
-                        return RedirectToAction("RegistrationSuccess");
-                    }
-                    else
+                    HttpContext.Session.SetString("KorisnikEmail", korisnik.Email);
+
+                    // Uspesna registracija - preusmeravanje na Index akciju kontrolera Proizvod
+                    return RedirectToAction("Index", "Proizvod");
+                }
+                else
                     {
                         // Neuspela registracija - možete prikazati poruku o grešci
                         ModelState.AddModelError(string.Empty, result);
@@ -105,6 +109,49 @@ namespace Client.Controllers
             // Ako je došlo do ovde, postoji problem sa unosom podataka ili registracijom
             return View("Register", korisnik); // Vratite korisnika na istu stranicu sa modelom
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit()
+        {
+            // Dohvati email trenutno ulogovanog korisnika iz sesije
+            var email = HttpContext.Session.GetString("KorisnikEmail");
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Login", "User");
+            }
+
+            IUserStatefullService proxy = null;
+
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/ProjekatCloud/UserStatefullService");
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+
+            proxy = ServiceProxy.Create<IUserStatefullService>(serviceUri);
+
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
+
+                var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
+
+                proxy = ServiceProxy.Create<IUserStatefullService>(serviceUri, servicePartitionKey);
+                break;
+            }
+
+            try
+            {
+                var korisnik = await proxy.GetUserByEmail(email);
+
+                return View("UpdateUser", korisnik);
+
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }
+        }
+
 
         [HttpGet]
         public IActionResult RegistrationSuccess()

@@ -11,8 +11,8 @@ namespace Common
 
     public class Korisnik
     {
-        [DataMember]
-        public int Id { get; set; }
+      //  [DataMember]
+        //public int Id { get; set; }
         [DataMember]
         public string Ime { get; set; } = null!;
         [DataMember]

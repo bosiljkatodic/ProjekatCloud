@@ -16,10 +16,10 @@ namespace UserStatefullService
     /// <summary>
     /// An instance of this class is created for each service replica by the Service Fabric runtime.
     /// </summary>
-    public sealed class UserStatefullService : StatefulService, IUserStatefullService
+    internal sealed class UserStatefullService : StatefulService, IUserStatefullService
     {
         private AzureStorageClient storageClient;
-        private IReliableDictionary<string, Korisnik> userDictionary;
+       // private IReliableDictionary<string, Korisnik> userDictionary;
 
         public UserStatefullService(StatefulServiceContext context)
             : base(context)
@@ -101,6 +101,40 @@ namespace UserStatefullService
                 return false;
             }
         }
+
+
+
+        public async Task<Korisnik> GetUserByEmail(string email)
+        {
+            try
+            {
+                var userDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Korisnik>>("usersDictionary");
+
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    var userExists = await userDictionary.ContainsKeyAsync(tx, email);
+
+                    if (userExists)
+                    {
+                        var user = await userDictionary.TryGetValueAsync(tx, email);
+
+                        if (user.HasValue)
+                        {
+                            return user.Value; // Vraća korisnika ako je pronađen
+                        }
+                    }
+                }
+
+                return null; // Vraća null ako korisnik sa datom email adresom nije pronađen
+            }
+            catch (Exception ex)
+            {
+                // Obrada grešaka (logovanje, slanje emaila, itd.)
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error during getting user by email: {ex.Message}");
+                return null;
+            }
+        }
+
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.

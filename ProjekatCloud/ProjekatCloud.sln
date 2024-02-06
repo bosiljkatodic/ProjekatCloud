@@ -7,11 +7,13 @@ Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "ProjekatCloud", "ProjekatCl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Validator", "Validator\Validator.csproj", "{8090FA23-4E6A-40C8-B0C3-345EF198601C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{4E327922-E48D-4FB5-9F50-BA6230D70A50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{4E327922-E48D-4FB5-9F50-BA6230D70A50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{FFD9BBFF-9725-4402-BB62-9CA7DD8DD2E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{FFD9BBFF-9725-4402-BB62-9CA7DD8DD2E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStatefullService", "UserStatefullService\UserStatefullService.csproj", "{19AADF56-BF28-4436-9476-C966D2711B8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserStatefullService", "UserStatefullService\UserStatefullService.csproj", "{19AADF56-BF28-4436-9476-C966D2711B8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductStatefullService", "ProductStatefullService\ProductStatefullService.csproj", "{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +67,14 @@ Global
 		{19AADF56-BF28-4436-9476-C966D2711B8E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{19AADF56-BF28-4436-9476-C966D2711B8E}.Release|x64.ActiveCfg = Release|Any CPU
 		{19AADF56-BF28-4436-9476-C966D2711B8E}.Release|x64.Build.0 = Release|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Debug|x64.Build.0 = Debug|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Release|x64.ActiveCfg = Release|Any CPU
+		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
