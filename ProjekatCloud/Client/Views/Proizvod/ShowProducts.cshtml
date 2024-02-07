@@ -57,9 +57,13 @@
     <form action="/User/UpdateUser">
         <button type="submit" >Izmijeni Profil</button>
     </form>
+    <form action="/Order/ShowKorpa">
+        <button type="submit">Korpa</button>
+    </form>
     <form action="/Proizvod/LogOut">
         <button type="submit">Log Out</button>
     </form>  
+
 </nav>
 
 @foreach (var grupa in Model)
@@ -87,7 +91,12 @@
                     <td>@proizvod.OpisProizvoda</td>
                     <td>@proizvod.CijenaProizvoda</td>
                     <td>@proizvod.KolicinaProizvoda</td>
-                    <td><button onclick="ubaciUKorpu('@proizvod.Id')">Ubaci u korpu</button></td>
+                        <td>
+                            <form method="post" action="/Order/UbaciUKorpu">
+                                <input type="hidden" name="productId" value="@proizvod.Id" />
+                                <button type="submit">Ubaci u korpu</button>
+                            </form>
+                        </td>
                 </tr>
             }
         </tbody>
@@ -96,10 +105,3 @@
 
 }
 
-<script>
-    function ubaciUKorpu(id) {
-        // Implementiraj logiku za ubacivanje proizvoda u korpu
-        // Možeš koristiti AJAX poziv ka serveru za smanjenje količine
-        // proizvoda u Reliable Dictionary-ju kada se proizvod ubaci u korpu
-    }
-</script>

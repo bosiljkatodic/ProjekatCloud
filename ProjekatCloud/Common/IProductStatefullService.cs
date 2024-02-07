@@ -14,7 +14,16 @@ namespace Common
     {
         [OperationContract]
         public Task<IEnumerable<Proizvod>> GetAllProducts();
+        [OperationContract]
+        public Task<bool> ReduceProductQuantity(int productId);
+        [OperationContract]
+        public Task<bool> DodajUKorpu(int productId);
 
+        [OperationContract]
+        public Task<IEnumerable<Proizvod>> GetCijeluKorpu();
+
+        [OperationContract]
+        public Task<Proizvod> GetProductById(int productId);
 
     }
 }

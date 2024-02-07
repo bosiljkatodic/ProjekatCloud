@@ -98,8 +98,9 @@ namespace Client
                         
                         app.MapControllers();
                         */
-                         // Dodajte middleware za redirekciju sa /swagger/index.html na /
-                      /*  app.Use(async (context, next) =>
+
+                        // Dodaj middleware za redirekciju sa /swagger/index.html na /
+                        app.Use(async (context, next) =>
                         {
                             if (context.Request.Path.StartsWithSegments("/swagger/index.html"))
                             {
@@ -109,7 +110,7 @@ namespace Client
 
                             await next();
                         });
-                        */
+                        
                         app.UseSession();
 
                         app.UseStaticFiles();

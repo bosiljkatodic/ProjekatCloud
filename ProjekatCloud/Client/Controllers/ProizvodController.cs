@@ -24,6 +24,7 @@ namespace Client.Controllers
             return RedirectToAction("Index", "Home"); // Preusmeravanje na početnu stranicu
         }
 
+
         [HttpGet]
         public async Task<IActionResult> ShowProducts()
         {
@@ -49,7 +50,7 @@ namespace Client.Controllers
                     break; // Ovde prekidamo petlju jer smo dobili jednu particiju
                 }
 
-                 try { 
+                try { 
                     IEnumerable<Proizvod> proizvodi = await proxy.GetAllProducts();
                     // Grupisanje proizvoda po kategorijama
                     var grupisaniProizvodi = proizvodi.GroupBy(p => p.KategorijaProizvoda);

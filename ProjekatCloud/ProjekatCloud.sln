@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserStatefullService", "UserStatefullService\UserStatefullService.csproj", "{19AADF56-BF28-4436-9476-C966D2711B8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductStatefullService", "ProductStatefullService\ProductStatefullService.csproj", "{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProductStatefullService", "ProductStatefullService\ProductStatefullService.csproj", "{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderStatefullService", "OrderStatefullService\OrderStatefullService.csproj", "{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,14 @@ Global
 		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Release|x64.ActiveCfg = Release|Any CPU
 		{7DF5FBE7-0A39-4BF3-AAA9-D5547281031F}.Release|x64.Build.0 = Release|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Debug|x64.Build.0 = Debug|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Release|x64.ActiveCfg = Release|Any CPU
+		{95FA0303-5DCE-4F49-9CAA-FB9FDEDA4ECE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

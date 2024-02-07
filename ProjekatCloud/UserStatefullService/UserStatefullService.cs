@@ -83,7 +83,6 @@ namespace UserStatefullService
                         // Commit changes
                         await tx.CommitAsync();
 
-                        // Dodatno, možete ažurirati korisnika u Azure Storage tabeli ako je to potrebno
                         await this.storageClient.UpdateKorisnikAsync(korisnik);
 
                         return true; // Uspješno ažurirano

@@ -73,5 +73,50 @@ namespace ProductStatefullService
             }
         }
 
+
+        public async Task<bool> UpdateProizvodAsync(Proizvod proizvod)
+        {
+            try
+            {
+                CloudTable proizvodiTable = GetProizvodiTableReference();
+
+                // Kreiraj upit za pretragu proizvoda prema ID-u
+                TableQuery<ProizvodEntity> query = new TableQuery<ProizvodEntity>()
+                    .Where(TableQuery.GenerateFilterConditionForInt("Id", QueryComparisons.Equal, proizvod.Id));
+
+                // Izvrši upit i preuzmi rezultate
+                var queryResult = await proizvodiTable.ExecuteQuerySegmentedAsync(query, null);
+
+                // Proveri da li je pronađen proizvod
+                if (queryResult.Results.Count > 0)
+                {
+                    // Ako je pronađen, ažuriraj njegove informacije
+                    ProizvodEntity existingEntity = queryResult.Results.First();
+                    existingEntity.KolicinaProizvoda = proizvod.KolicinaProizvoda;
+
+                    // Kreiraj operaciju za ažuriranje entiteta
+                    TableOperation updateOperation = TableOperation.Replace(existingEntity);
+
+                    // Izvrši operaciju ažuriranja
+                    await proizvodiTable.ExecuteAsync(updateOperation);
+
+                    // Uspješno ažuriranje
+                    return true;
+                }
+                else
+                {
+                    // Proizvod nije pronađen, nije moguće izvršiti ažuriranje
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Logovanje grešaka (opciono)
+                Console.WriteLine($"Greška pri ažuriranju proizvoda: {ex.Message}");
+                throw; // Propagiranje izuzetka dalje
+            }
+        }
+
+
     }
 }

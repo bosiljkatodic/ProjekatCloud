@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Common.Proizvod>
+
+<form action="/Proizvod/ShowProducts">
+    <button type="submit">Vrati se na proizvode</button>
+</form>
+
+<h2>Korpa</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Naziv proizvoda</th>
+                <th>Količina</th>
+                <th>Cijena</th>
+                <th>Opcije</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var proizvod in Model)
+            {
+                <tr>
+                    <td>@proizvod.NazivProizvoda</td>
+                    <td>@proizvod.KolicinaProizvoda</td>
+                    <td>@proizvod.CijenaProizvoda</td>
+                    <td>
+                        <form asp-controller="Order" asp-action="ObrisiIzKorpe" method="post">
+                            <input type="hidden" name="productId" value="@proizvod.Id" />
+                            <button type="submit" class="btn btn-danger">Obriši</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <form asp-controller="Order" asp-action="Naruci" method="post">
+        <button type="submit" class="btn btn-success">Naruči</button>
+    </form>
+
+
