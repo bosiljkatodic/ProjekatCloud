@@ -31,7 +31,7 @@ namespace Validator
             }
 
             if (string.IsNullOrWhiteSpace(korisnik.Ime) || string.IsNullOrWhiteSpace(korisnik.Prezime) ||
-                string.IsNullOrWhiteSpace(korisnik.Email))
+                string.IsNullOrWhiteSpace(korisnik.Email) || string.IsNullOrWhiteSpace(korisnik.Lozinka))
             {
                 return "Model is not okay";
             }
@@ -75,6 +75,60 @@ namespace Validator
                 return "Neuspjesna registracija";
             }
             
+        }
+
+        public async Task<string> ValidateUpdate(Korisnik korisnik)
+        {
+            if (korisnik == null)
+            {
+                return "Model is not okay";
+            }
+
+            if (string.IsNullOrWhiteSpace(korisnik.Ime) || string.IsNullOrWhiteSpace(korisnik.Prezime) ||
+                string.IsNullOrWhiteSpace(korisnik.Email) || string.IsNullOrWhiteSpace(korisnik.Lozinka))
+            {
+                return "Model is not okay";
+            }
+
+            var fabricClient = new FabricClient();
+
+            var serviceUri = new Uri("fabric:/ProjekatCloud/UserStatefullService");
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+            IUserStatefullService proxy = null;
+
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
+
+                if (partitionKey != null)
+                {
+                    var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
+
+                    proxy = ServiceProxy.Create<IUserStatefullService>(serviceUri, servicePartitionKey);
+                    break;
+                }
+            }
+
+            try
+            {
+                /* bool userExists = await proxy.CheckIfUserExists(korisnik.Email);
+
+                 if (userExists)
+                 {
+                     return "Korisnik već postoji u bazi podataka";
+                 }
+                */
+                await proxy.UpdateKorisnik(korisnik);
+                return "Uspjesna izmjena";
+
+
+            }
+            catch (Exception)
+            {
+
+                return "Neuspjesna izmjena";
+            }
+
         }
 
         public async Task<string> ValidateLogin(LoginViewModel korisnik)

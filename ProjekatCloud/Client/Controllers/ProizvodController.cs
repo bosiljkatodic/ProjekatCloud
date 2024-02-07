@@ -25,48 +25,41 @@ namespace Client.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> ShowProducts()
         {
-            IProductStatefullService proxy = null;
-
-            var fabricClient = new FabricClient();
-            var serviceUri = new Uri("fabric:/ProjekatCloud/ProductStatefullService");
-            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
-
-            proxy = ServiceProxy.Create<IProductStatefullService>(serviceUri);
-
-            foreach (var partition in partitionList)
+            // Provera da li je korisnik prijavljen
+            if (HttpContext.Session.GetString("KorisnikEmail") == null)
             {
-                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
-
-                var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
-
-                proxy = ServiceProxy.Create<IProductStatefullService>(serviceUri, servicePartitionKey);
-                break;
+                // Ako korisnik nije prijavljen, preusmerite ga na stranicu za prijavu
+                return RedirectToAction("Login", "User");
             }
 
-            try
-            {
-                IEnumerable<Proizvod> proizvodi = await proxy.GetAllProducts();
-                // Grupisanje proizvoda po kategorijama
-                var grupisaniProizvodi = proizvodi.GroupBy(p => p.KategorijaProizvoda);
+           
+                var fabricClient = new FabricClient();
+                var serviceUri = new Uri("fabric:/ProjekatCloud/ProductStatefullService");
+                var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
 
-                return View(grupisaniProizvodi);
+                IProductStatefullService proxy = null;
 
-        
-            }
-            catch (Exception)
-            {
-                return View("Error");
-            }
+                foreach (var partition in partitionList)
+                {
+                    var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
+                    var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
+                    proxy = ServiceProxy.Create<IProductStatefullService>(serviceUri, servicePartitionKey);
+                    break; // Ovde prekidamo petlju jer smo dobili jednu particiju
+                }
 
+                 try { 
+                    IEnumerable<Proizvod> proizvodi = await proxy.GetAllProducts();
+                    // Grupisanje proizvoda po kategorijama
+                    var grupisaniProizvodi = proizvodi.GroupBy(p => p.KategorijaProizvoda);
+                    return View("ShowProducts", grupisaniProizvodi);
+                }
+                catch (Exception) 
+                {
+                    return View("Error"); // Ako nije pronađen proxy, prikaži grešku
+                }
         }
 
-
-        [HttpGet]
-        public IActionResult IzmeniProfil()
-        {
-            return RedirectToAction("Edit", "User");
-        }
     }
 }

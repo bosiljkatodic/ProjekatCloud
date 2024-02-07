@@ -26,5 +26,9 @@ namespace Common
         [OperationContract]
         public Task<Korisnik> GetUserByEmail(string email);
 
+        [OperationContract]
+        public Task<bool> UpdateKorisnik(Korisnik korisnik);
+
+
     }
 }

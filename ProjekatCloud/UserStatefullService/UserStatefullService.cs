@@ -19,7 +19,6 @@ namespace UserStatefullService
     internal sealed class UserStatefullService : StatefulService, IUserStatefullService
     {
         private AzureStorageClient storageClient;
-       // private IReliableDictionary<string, Korisnik> userDictionary;
 
         public UserStatefullService(StatefulServiceContext context)
             : base(context)
@@ -30,11 +29,7 @@ namespace UserStatefullService
 
         }
 
-       /* public async Task<bool> Login(LoginViewModel loginViewModel)
-        {
-            throw new NotImplementedException();
-        }
-       */
+
         public async Task<bool> Register(Korisnik korisnik)
         {
             if (korisnik == null)
@@ -67,6 +62,46 @@ namespace UserStatefullService
                 return false;
             }
         }
+
+        public async Task<bool> UpdateKorisnik(Korisnik korisnik)
+        {
+            try
+            {
+                var stateManager = this.StateManager;
+
+                var userDictionary = await stateManager.GetOrAddAsync<IReliableDictionary<string, Korisnik>>("usersDictionary");
+
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    var userExists = await userDictionary.ContainsKeyAsync(tx, korisnik.Email);
+
+                    if (userExists)
+                    {
+                        // Ako korisnik postoji, ažuriraj ga
+                        await userDictionary.SetAsync(tx, korisnik.Email, korisnik);
+
+                        // Commit changes
+                        await tx.CommitAsync();
+
+                        // Dodatno, možete ažurirati korisnika u Azure Storage tabeli ako je to potrebno
+                        await this.storageClient.UpdateKorisnikAsync(korisnik);
+
+                        return true; // Uspješno ažurirano
+                    }
+                    else
+                    {
+                        return false; // Korisnik sa datim emailom nije pronađen
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Obrada grešaka (logovanje, slanje emaila, itd.)
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Greška prilikom ažuriranja korisnika: {ex.Message}");
+                return false;
+            }
+        }
+
 
         public async Task<bool> ValidateCredentials(string email, string password)
         {
@@ -134,6 +169,7 @@ namespace UserStatefullService
                 return null;
             }
         }
+
 
 
         /// <summary>

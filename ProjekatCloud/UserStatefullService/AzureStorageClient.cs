@@ -29,8 +29,8 @@ namespace UserStatefullService
                     //Id = korisnik.Id,
                     Ime = korisnik.Ime,
                     Prezime = korisnik.Prezime,
-                    Email = korisnik.Email
-                    // Dodajte ostale podatke korisnika prema potrebi
+                    Email = korisnik.Email,
+                    Lozinka = korisnik.Lozinka
                 };
 
                 TableOperation insertOperation = TableOperation.Insert(korisnikEntity);
@@ -58,5 +58,51 @@ namespace UserStatefullService
 
             return korisniciTable;
         }
+
+        public async Task<bool> UpdateKorisnikAsync(Korisnik korisnik)
+        {
+            try
+            {
+                CloudTable korisniciTable = GetKorisniciTableReference();
+
+                // Kreiraj upit za pretragu korisnika prema email adresi
+                TableQuery<KorisnikEntity> query = new TableQuery<KorisnikEntity>()
+                    .Where(TableQuery.GenerateFilterCondition("Email", QueryComparisons.Equal, korisnik.Email));
+
+                // Izvrši upit i preuzmi rezultate
+                var queryResult = await korisniciTable.ExecuteQuerySegmentedAsync(query, null);
+
+                // Proveri da li je pronađen korisnik
+                if (queryResult.Results.Count > 0)
+                {
+                    // Ako je pronađen, ažuriraj njegove informacije
+                    KorisnikEntity existingEntity = queryResult.Results.First();
+                    existingEntity.Ime = korisnik.Ime;
+                    existingEntity.Prezime = korisnik.Prezime;
+                    existingEntity.Lozinka = korisnik.Lozinka;
+
+                    // Kreiraj operaciju za ažuriranje entiteta
+                    TableOperation updateOperation = TableOperation.Replace(existingEntity);
+
+                    // Izvrši operaciju ažuriranja
+                    await korisniciTable.ExecuteAsync(updateOperation);
+
+                    // Uspješno ažuriranje
+                    return true;
+                }
+                else
+                {
+                    // Korisnik nije pronađen, nije moguće izvršiti ažuriranje
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Logovanje grešaka (opciono)
+                Console.WriteLine($"Greška pri ažuriranju korisnika: {ex.Message}");
+                throw; // Propagiranje izuzetka dalje
+            }
+        }
+
     }
 }

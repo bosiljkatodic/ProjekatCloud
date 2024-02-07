@@ -17,5 +17,8 @@ namespace Common
 
         [OperationContract]
         Task<string> ValidateLogin(LoginViewModel loginViewModel);
+
+        [OperationContract]
+        Task<string> ValidateUpdate(Korisnik korisnikPodaci);
     }
 }

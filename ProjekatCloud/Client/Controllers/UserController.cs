@@ -52,7 +52,7 @@ namespace Client.Controllers
                     // Uspela prijava - možete preusmeriti korisnika, postaviti sesiju, ili bilo šta drugo
                     HttpContext.Session.SetString("KorisnikEmail", loginViewModel.Email);
 
-                    return RedirectToAction("Index", "Proizvod");
+                    return RedirectToAction("ShowProducts", "Proizvod");
                     }
                     else
                     {
@@ -91,9 +91,9 @@ namespace Client.Controllers
                     HttpContext.Session.SetString("KorisnikEmail", korisnik.Email);
 
                     // Uspesna registracija - preusmeravanje na Index akciju kontrolera Proizvod
-                    return RedirectToAction("Index", "Proizvod");
-                }
-                else
+                    return RedirectToAction("ShowProducts", "Proizvod");
+                     }
+                     else
                     {
                         // Neuspela registracija - možete prikazati poruku o grešci
                         ModelState.AddModelError(string.Empty, result);
@@ -110,8 +110,42 @@ namespace Client.Controllers
             return View("Register", korisnik); // Vratite korisnika na istu stranicu sa modelom
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateUser(Korisnik korisnik)
+        {
+            try
+            {
+                // Provera da li je model validan
+                IValidator proxy = null;
+                var fabricClient = new FabricClient();
+                var serviceUri = new Uri("fabric:/ProjekatCloud/Validator");
+                proxy = ServiceProxy.Create<IValidator>(serviceUri);
+
+                // Validacija korisnika
+                string validationResult = await proxy.ValidateUpdate(korisnik);
+
+                if (validationResult == "Uspjesna izmjena")
+                {
+                    HttpContext.Session.SetString("KorisnikEmail", korisnik.Email);
+
+                    return RedirectToAction("UpdateUser", korisnik);
+                }
+                else
+                {
+                    return View("Error");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // Greška prilikom ažuriranja korisnika - prikaži grešku
+                ModelState.AddModelError(string.Empty, $"Greška prilikom ažuriranja korisnika: {ex.Message}");
+                return View("UpdateUser", korisnik);
+            }
+        }
+
         [HttpGet]
-        public async Task<IActionResult> Edit()
+        public async Task<IActionResult> UpdateUser()
         {
             // Dohvati email trenutno ulogovanog korisnika iz sesije
             var email = HttpContext.Session.GetString("KorisnikEmail");
@@ -152,11 +186,5 @@ namespace Client.Controllers
             }
         }
 
-
-        [HttpGet]
-        public IActionResult RegistrationSuccess()
-        {
-            return View();
-        }
     }
 }

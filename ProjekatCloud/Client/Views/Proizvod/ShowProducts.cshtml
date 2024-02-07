@@ -53,11 +53,9 @@
 <h1>Proizvodi</h1>
 
 <nav>
-    <form asp-controller="Proizvod" asp-action="Index">
-        <button type="submit" onclick="location.href='@Url.Action("Index", "Proizvod")'">Home</button>
-    </form>
-    <form asp-controller="User" asp-action="IzmeniProfil">
-        <button type="submit" onclick="location.href='@Url.Action("Edit", "User")'">Izmijeni Profil</button>
+    
+    <form action="/User/UpdateUser">
+        <button type="submit" >Izmijeni Profil</button>
     </form>
     <form asp-controller="Proizvod" asp-action="LogOut">
         <button type="submit" onclick="location.href='@Url.Action("LogOut", "Proizvod")'">Log Out</button>

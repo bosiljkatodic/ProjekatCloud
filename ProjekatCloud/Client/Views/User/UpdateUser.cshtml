@@ -4,45 +4,41 @@
     ViewData["Title"] = "Update User";
 }
 
-<h1>Update User</h1>
+<h1>Izmijeni profil</h1>
 
-<div class="container">
-    <form asp-action="SaveChanges" method="post">
-        <div class="form-group row">
-            <label for="Ime" class="col-sm-2 col-form-label">First Name:</label>
-            <div class="col-sm-10">
-                <input asp-for="Ime" class="form-control" id="Ime" placeholder="Enter first name" required>
-                <span asp-validation-for="Ime" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="Prezime" class="col-sm-2 col-form-label">Last Name:</label>
-            <div class="col-sm-10">
-                <input asp-for="Prezime" class="form-control" id="Prezime" placeholder="Enter last name" required>
-                <span asp-validation-for="Prezime" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="Email" class="col-sm-2 col-form-label">Email:</label>
-            <div class="col-sm-10">
-                <input asp-for="Email" class="form-control" id="Email" readonly>
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="Lozinka" class="col-sm-2 col-form-label">Password:</label>
-            <div class="col-sm-10">
-                <input asp-for="Lozinka" type="password" class="form-control" id="Lozinka" placeholder="Enter password" required>
-                <span asp-validation-for="Lozinka" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="form-group row">
-            <div class="col-sm-10 offset-sm-2">
+@using (Html.BeginForm("UpdateUser", "User", FormMethod.Post))
+{
+
+    <div class="form-group">
+        <label asp-for="Ime">Ime</label>
+
+        <input asp-for="Ime" name="Ime" class="form-control" value="@Model.Ime" />
+        <span asp-validation-for="Ime" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="form-group">
+        <label asp-for="Prezime">Prezime</label>
+        <input asp-for="Prezime" name="Prezime" class="form-control" value="@Model.Prezime" />
+        <span asp-validation-for="Prezime" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="form-group">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" name="Email" class="form-control" readonly value="@Model.Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="form-group">
+        <label asp-for="Lozinka">Lozinka</label>
+        <input asp-for="Lozinka" name="Lozinka" type="password" class="form-control" value="@Model.Lozinka" />
+        <span asp-validation-for="Lozinka" class="text-danger"></span>
+    </div>
+    <br />
+
                 <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        </div>
-    </form>
-</div>
+
+  
+}
 
 @section Scripts {
     <script>
