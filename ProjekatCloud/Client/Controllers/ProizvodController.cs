@@ -9,19 +9,37 @@ namespace Client.Controllers
 {
     public class ProizvodController : Controller
     {
-        /* public IActionResult Index()
-         {
-             return View();
-         }
-        */
 
         [HttpGet]
-        public IActionResult LogOut()
+        public async Task<IActionResult> LogOut()
         {
-            // Implementacija logike za odjavljivanje
             HttpContext.Session.Remove("KorisnikEmail");
+            // Implementacija logike za odjavljivanje
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/ProjekatCloud/ProductStatefullService");
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
 
-            return RedirectToAction("Index", "Home"); // Preusmeravanje na početnu stranicu
+            IProductStatefullService proxy = null;
+
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
+                var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
+                proxy = ServiceProxy.Create<IProductStatefullService>(serviceUri, servicePartitionKey);
+                break; // Ovde prekidamo petlju jer smo dobili jednu particiju
+            }
+
+            try
+            {
+                await proxy.IsprazniKorpu();
+                return RedirectToAction("Index", "Home");
+
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
         }
 
 

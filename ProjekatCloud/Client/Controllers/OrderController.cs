@@ -90,6 +90,53 @@ namespace Client.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> IzbaciIzKorpe(int productId)
+        {
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/ProjekatCloud/ProductStatefullService");
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+
+            IProductStatefullService proxy = null;
+
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
+                var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
+                proxy = ServiceProxy.Create<IProductStatefullService>(serviceUri, servicePartitionKey);
+                break; // Ovde prekidamo petlju jer smo dobili jednu particiju
+            }
+
+            try
+            {
+                var izbacen = await proxy.IzbaciIzKorpe(productId);
+
+                if (izbacen)
+                {
+                    // Ako je proizvod uspješno izbačen iz korpe, preusmjeri na stranicu "ShowKorpa"
+                    var korpa = await proxy.GetCijeluKorpu();
+
+                    // Ažuriraj proizvod u Azure Storage-u
+                    var productToUpdate = await proxy.GetProductById(productId);
+                    if (productToUpdate != null)
+                    {
+                        await proxy.UpdateProductInStorage(productToUpdate);
+                    }
+
+                    return View("ShowKorpa", korpa);
+                }
+                else
+                {
+                    // Ako proizvod nije pronađen u korpi, prikaži odgovarajuću poruku
+                    TempData["ErrorMessage"] = "Proizvod nije pronađen u korpi.";
+                    return View("Error");
+                }
+            }
+            catch (Exception)
+            {
+                return View("Error"); // Ako nije pronađen proxy, prikaži grešku
+            }
+        }
 
 
     }

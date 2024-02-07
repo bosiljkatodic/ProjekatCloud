@@ -24,6 +24,12 @@ namespace Common
 
         [OperationContract]
         public Task<Proizvod> GetProductById(int productId);
+        [OperationContract]
+        public Task<bool> UpdateProductInStorage(Proizvod product);
 
+        [OperationContract]
+        public Task<bool> IzbaciIzKorpe(int productId);
+        [OperationContract]
+        public Task<bool> IsprazniKorpu();
     }
 }

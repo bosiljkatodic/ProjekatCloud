@@ -5,7 +5,8 @@
 </form>
 
 <h2>Korpa</h2>
-
+@if (Model.Count() > 0)
+{
     <table class="table">
         <thead>
             <tr>
@@ -23,7 +24,7 @@
                     <td>@proizvod.KolicinaProizvoda</td>
                     <td>@proizvod.CijenaProizvoda</td>
                     <td>
-                        <form asp-controller="Order" asp-action="ObrisiIzKorpe" method="post">
+                    <form method="post" action="/Order/IzbaciIzKorpe">
                             <input type="hidden" name="productId" value="@proizvod.Id" />
                             <button type="submit" class="btn btn-danger">Obriši</button>
                         </form>
@@ -33,8 +34,12 @@
         </tbody>
     </table>
 
-    <form asp-controller="Order" asp-action="Naruci" method="post">
-        <button type="submit" class="btn btn-success">Naruči</button>
+    <form method="post" action="/Order/Naruci">
+        <button type="submit">Naruči</button>
     </form>
 
-
+}
+else
+{
+    <p>Korpa je prazna.</p>
+}

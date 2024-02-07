@@ -277,6 +277,136 @@ namespace ProductStatefullService
             }
         }
 
+        public async Task<bool> IzbaciIzKorpe(int productId)
+        {
+            try
+            {
+                var korpaDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("korpaDictionary");
+                var productDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("productDictionary");
+
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    // Provjeri je li proizvod u korpi
+                    var existingProductInCart = await korpaDictionary.TryRemoveAsync(tx, productId);
+
+                    if (existingProductInCart.HasValue)
+                    {
+                        // Proizvod je uklonjen iz korpe, vratite ga u glavni dictionary
+                        var existingProductInDictionary = await productDictionary.TryGetValueAsync(tx, productId);
+
+                        if (existingProductInDictionary.HasValue)
+                        {
+                            // Ako proizvod postoji u glavnom dictionary-u, ažuriraj količinu
+                            var product = existingProductInDictionary.Value;
+                            product.KolicinaProizvoda += existingProductInCart.Value.KolicinaProizvoda;
+
+                            // Ažuriraj proizvod u glavnom dictionary-u
+                            await productDictionary.SetAsync(tx, productId, product);
+                        }
+                        else
+                        {
+                            // Ako proizvod nije pronađen u glavnom dictionary-u, dodaj ga s količinom iz korpe
+                            await productDictionary.AddAsync(tx, productId, existingProductInCart.Value);
+                        }
+
+                        // Potvrdi transakciju
+                        await tx.CommitAsync();
+
+                        return true;
+                    }
+                    else
+                    {
+                        // Proizvod nije pronađen u korpi
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Logiranje greške ako se dogodi
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error removing product from cart: {ex.Message}");
+                throw; // Propagiranje izuzetka dalje
+            }
+        }
+
+        public async Task<bool> UpdateProductInStorage(Proizvod product)
+        {
+            try
+            {
+                await this.storageClient.UpdateProizvodAsync(product);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Logiranje greške ako se dogodi
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error updating product in Azure Storage: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> IsprazniKorpu()
+        {
+            try
+            {
+                var korpaDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("korpaDictionary");
+                var productDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("productDictionary");
+
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    // Dobij sve stavke iz korpe
+                    var korpaEnumerable = await korpaDictionary.CreateEnumerableAsync(tx);
+
+                    // Iteriraj kroz sve stavke korpe
+                    using (var enumerator = korpaEnumerable.GetAsyncEnumerator())
+                    {
+                        while (await enumerator.MoveNextAsync(default))
+                        {
+                            var productId = enumerator.Current.Key;
+                            var productInCart = enumerator.Current.Value;
+
+                            // Ukloni proizvod iz korpe
+                            await korpaDictionary.TryRemoveAsync(tx, productId);
+
+                            // Dobij ili dodaj proizvod u glavni dictionary
+                            var existingProductInDictionary = await productDictionary.TryGetValueAsync(tx, productId);
+
+                            if (existingProductInDictionary.HasValue)
+                            {
+                                // Ako proizvod postoji u glavnom dictionary-u, ažuriraj količinu
+                                var product = existingProductInDictionary.Value;
+                                product.KolicinaProizvoda += productInCart.KolicinaProizvoda;
+
+                                // Ažuriraj proizvod u glavnom dictionary-u
+                                await productDictionary.SetAsync(tx, productId, product);
+                                // Ažuriraj podatke u Azure Storage-u
+                                await UpdateProductInStorage(product);
+                            }
+                            else
+                            {
+                                // Ako proizvod nije pronađen u glavnom dictionary-u, dodaj ga s količinom iz korpe
+                                await productDictionary.AddAsync(tx, productId, productInCart);
+                                // Ažuriraj podatke u Azure Storage-u
+                                await UpdateProductInStorage(productInCart);
+                            }
+
+                        }
+                    }
+
+                    // Potvrdi transakciju
+                    await tx.CommitAsync();
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Logiranje greške ako se dogodi
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error clearing cart: {ex.Message}");
+                throw; // Propagiranje izuzetka dalje
+            }
+        }
+
+
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
