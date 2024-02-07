@@ -59,6 +59,50 @@ namespace UserStatefullService
             return korisniciTable;
         }
 
+        public async Task<List<Korisnik>> GetAllUsersAsync()
+        {
+            try
+            {
+                CloudTable korisniciTable = GetKorisniciTableReference();
+
+                // Kreiraj upit za čitanje svih korisnika iz tabele
+                TableQuery<KorisnikEntity> query = new TableQuery<KorisnikEntity>();
+
+                // Izvrši upit i preuzmi rezultate
+                TableContinuationToken continuationToken = null;
+                List<Korisnik> allUsers = new List<Korisnik>();
+
+                do
+                {
+                    var queryResult = await korisniciTable.ExecuteQuerySegmentedAsync(query, continuationToken);
+                    foreach (var korisnikEntity in queryResult.Results)
+                    {
+                        // Mapiraj KorisnikEntity na Korisnik
+                        Korisnik korisnik = new Korisnik
+                        {
+                            Ime = korisnikEntity.Ime,
+                            Prezime = korisnikEntity.Prezime,
+                            Email = korisnikEntity.Email,
+                            Lozinka = korisnikEntity.Lozinka
+                        };
+                        allUsers.Add(korisnik);
+                    }
+                    continuationToken = queryResult.ContinuationToken;
+                }
+                while (continuationToken != null);
+
+                return allUsers;
+            }
+            catch (Exception ex)
+            {
+                // Logovanje grešaka (opciono)
+                Console.WriteLine($"Greška pri čitanju svih korisnika: {ex.Message}");
+                throw; // Propagiranje izuzetka dalje
+            }
+        }
+
+
+
         public async Task<bool> UpdateKorisnikAsync(Korisnik korisnik)
         {
             try

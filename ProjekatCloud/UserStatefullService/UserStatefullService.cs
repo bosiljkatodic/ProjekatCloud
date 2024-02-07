@@ -193,6 +193,44 @@ namespace UserStatefullService
         {
             await base.RunAsync(cancellationToken);
 
+            //citanje iz baze
+            try
+            {
+                // Čitanje svih korisnika iz Azure Storage baze
+                var usersFromStorage = await this.storageClient.GetAllUsersAsync();
+
+                // Provera da li postoje korisnici u bazi
+                if (usersFromStorage != null && usersFromStorage.Any())
+                {
+                    // Dobijanje ili dodavanje Reliable Dictionary
+                    var userDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Korisnik>>("usersDictionary");
+
+                    // Pisanje svih korisnika iz Azure Storage baze u Reliable Dictionary
+                    using (var tx = this.StateManager.CreateTransaction())
+                    {
+                        foreach (var korisnik in usersFromStorage)
+                        {
+                            await userDictionary.AddOrUpdateAsync(tx, korisnik.Email, korisnik, (key, value) => korisnik);
+                        }
+
+                        // Commit transakcije
+                        await tx.CommitAsync();
+                    }
+
+                    ServiceEventSource.Current.ServiceMessage(this.Context, $"Successfully loaded users from Azure Storage.");
+                }
+                else
+                {
+                    ServiceEventSource.Current.ServiceMessage(this.Context, $"No users found in Azure Storage.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error during loading users from Azure Storage: {ex.Message}");
+            }
+
+
+
             var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
 
             while (true)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
@@ -17,29 +17,55 @@ namespace ProductStatefullService
     /// </summary>
     internal sealed class ProductStatefullService : StatefulService, IProductStatefullService
     {
+        private AzureStorageClient storageClient;
+
         public ProductStatefullService(StatefulServiceContext context)
             : base(context)
-        { }
+        {
+            // Inicijalizuj Azure Storage Client
+            string azureStorageConnectionString = "DefaultEndpointsProtocol=https;AccountName=onlinestoreftn;AccountKey=zKWefU5Jq1NrKQoWaaiBKZEYukHCOwfhFz0M6o5TR3s4X/LXvNO5mxzEJuv1OY+oklshIhHw1Ikl+AStwNnFPg==;EndpointSuffix=core.windows.net"; // Postavite stvarni connection string
+            this.storageClient = new AzureStorageClient(azureStorageConnectionString);
+        }
 
         public async Task InitializeAsync()
         {
-            List<Proizvod> proizvodi = new()
+            //citanje iz baze
+            try
             {
-                new Proizvod() { Id = 1, CijenaProizvoda=200, KategorijaProizvoda="Knjige", KolicinaProizvoda=10, NazivProizvoda="Zdravi recepti", OpisProizvoda="100 zdravih recepata" },
-                new Proizvod() { Id = 2, CijenaProizvoda=100, KategorijaProizvoda="Uredjaji", KolicinaProizvoda=2, NazivProizvoda="Fen", OpisProizvoda="Fen za kosu" },
-                new Proizvod() { Id = 3, CijenaProizvoda=100, KategorijaProizvoda="Kozmetika", KolicinaProizvoda=5, NazivProizvoda="Umivalica", OpisProizvoda="pjena za umivanje" },
-                new Proizvod() { Id = 4, CijenaProizvoda=100, KategorijaProizvoda="Kozmetika", KolicinaProizvoda=3, NazivProizvoda="Krema", OpisProizvoda="krema za hidarataciju" },
-                new Proizvod() { Id = 5, CijenaProizvoda=100, KategorijaProizvoda="Cvijece", KolicinaProizvoda=10, NazivProizvoda="Lale", OpisProizvoda="vise boja" }
-            };
+                // Čitanje svih korisnika iz Azure Storage baze
+                var FromStorage = await this.storageClient.GetAllProductsAsync();
 
-            var stateManager = this.StateManager;
-            var productDictionary = await stateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("productDictionary");
+                // Provera da li postoje korisnici u bazi
+                if (FromStorage != null && FromStorage.Any())
+                {
+                    var stateManager = this.StateManager;
 
-            using var transaction = stateManager.CreateTransaction();
-            foreach (Proizvod proizvod in proizvodi)
-                await productDictionary.AddOrUpdateAsync(transaction, proizvod.Id, proizvod, (k, v) => proizvod);
+                    // Dobijanje ili dodavanje Reliable Dictionary
+                    var productDictionary = await stateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("productDictionary");
 
-            await transaction.CommitAsync();
+                    // Pisanje svih korisnika iz Azure Storage baze u Reliable Dictionary
+                    using (var tx = this.StateManager.CreateTransaction())
+                    {
+                        foreach (var proizvod in FromStorage)
+                        {
+                            await productDictionary.AddOrUpdateAsync(tx, proizvod.Id, proizvod, (key, value) => proizvod);
+                        }
+
+                        // Commit transakcije
+                        await tx.CommitAsync();
+                    }
+
+                    ServiceEventSource.Current.ServiceMessage(this.Context, $"Successfully loaded products from Azure Storage.");
+                }
+                else
+                {
+                    ServiceEventSource.Current.ServiceMessage(this.Context, $"No products found in Azure Storage.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error during loading products from Azure Storage: {ex.Message}");
+            }
         }
 
         public async Task<IEnumerable<Proizvod>> GetAllProducts()
