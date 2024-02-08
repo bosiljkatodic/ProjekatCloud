@@ -9,6 +9,11 @@ namespace Client.Controllers
 {
     public class ProizvodController : Controller
     {
+        /* public IActionResult Index()
+         {
+             return View();
+         }
+        */
 
         [HttpGet]
         public async Task<IActionResult> LogOut()

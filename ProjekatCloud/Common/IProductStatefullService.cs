@@ -31,5 +31,7 @@ namespace Common
         public Task<bool> IzbaciIzKorpe(int productId);
         [OperationContract]
         public Task<bool> IsprazniKorpu();
+        [OperationContract]
+        public Task<bool> IsprazniKorpuPriPorudzbini();
     }
 }

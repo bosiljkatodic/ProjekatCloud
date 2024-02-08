@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Common;
+using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace OrderStatefullService
@@ -14,52 +16,68 @@ namespace OrderStatefullService
     /// <summary>
     /// An instance of this class is created for each service replica by the Service Fabric runtime.
     /// </summary>
-    internal sealed class OrderStatefullService : StatefulService, IOrderStatefullService
+    public sealed class OrderStatefullService : StatefulService, IOrderStatefullService
     {
+        private AzureStorageClient storageClient;
+
         public OrderStatefullService(StatefulServiceContext context)
             : base(context)
-        { }
-
-        public async Task<bool> DodajUKorpu(int productId)
         {
-            try
-            {
-                // Dobijanje ili kreiranje Reliable Dictionary za korpu
-                var korpaDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("korpaDictionary");
+            // Inicijalizuj Azure Storage Client
+            string azureStorageConnectionString = "DefaultEndpointsProtocol=https;AccountName=onlinestoreftn;AccountKey=zKWefU5Jq1NrKQoWaaiBKZEYukHCOwfhFz0M6o5TR3s4X/LXvNO5mxzEJuv1OY+oklshIhHw1Ikl+AStwNnFPg==;EndpointSuffix=core.windows.net"; // Postavite stvarni connection string
+            this.storageClient = new AzureStorageClient(azureStorageConnectionString);
+        }
 
-                // Provera da li proizvod već postoji u korpi
-                using (var tx = this.StateManager.CreateTransaction())
+        public async Task<bool> KreirajPorudzbinu(string emailKorisnika, IEnumerable<Proizvod> proizvodi, string nacinPlacanja, double ukupnaCijena)
+        {
+            // Pristupite kolekciji Porudzbina u Azure Storage-u
+            var porudzbineDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<int, Porudzbina>>("PorudzbineDictionary");
+
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                // Generišite novi ID za porudžbinu
+                long id = DateTime.Now.Ticks;
+                /*
+                // Kreirajte novu porudžbinu
+                var novaPorudzbina = new Porudzbina
                 {
-                    var existingProduct = await korpaDictionary.TryGetValueAsync(tx, productId);
-                    if (existingProduct.HasValue)
-                    {
-                        // Ako proizvod već postoji, samo povećaj njegovu količinu
-                        await korpaDictionary.AddOrUpdateAsync(tx, productId, existingProduct.Value, (key, value) =>
-                        {
-                            value.KolicinaProizvoda++;
-                            return value;
-                        });
-                    }
-                    else
-                    {
-                        // Ako proizvod ne postoji, dodaj ga u korpu sa količinom 1
-                        var newProduct = new Proizvod { Id = productId, KolicinaProizvoda = 1 };
-                        await korpaDictionary.AddAsync(tx, productId, newProduct);
-                    }
+                    Id = (int)id,
+                    Narucilac = new Korisnik { Email = emailKorisnika }, // Kreirajte korisnika na osnovu emaila
+                    Proizvodi = proizvodi.ToList(),
+                    NacinPlacanja = (NacinPlacanja)Enum.Parse(typeof(NacinPlacanja), nacinPlacanja),
+                    UkupnaCijena = ukupnaCijena
+                };
+                */
+                // Dodajte novu porudžbinu u kolekciju
+                //await porudzbineDictionary.AddAsync(tx, novaPorudzbina.Id, novaPorudzbina);
 
-                    // Potvrdi transakciju
-                    await tx.CommitAsync();
+                // Commit transakcije
+                //await tx.CommitAsync();
 
-                    return true; // Uspješno dodan proizvod u korpu
+                foreach (var proizvod in proizvodi)
+                {
+                    await this.storageClient.AddPorudzbina((int)id, emailKorisnika, proizvod.OpisProizvoda, proizvod.CijenaProizvoda, proizvod.Id, proizvod.NazivProizvoda, proizvod.KolicinaProizvoda, nacinPlacanja, ukupnaCijena);
                 }
-            }
-            catch (Exception ex)
-            {
-                // Logovanje greške ako se desi
-                Console.WriteLine($"Greška pri dodavanju proizvoda u korpu: {ex.Message}");
-                return false; // Greška pri dodavanju proizvoda u korpu
+                return true;
+
             }
         }
+
+        private async Task<long> GetNextIdAsync(ITransaction tx, string key)
+        {
+            var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
+            var result = await myDictionary.AddOrUpdateAsync(tx, key, 0, (k, v) => ++v);
+            return result;
+        }
+
+        public async Task<IEnumerable<PorudzbinaEntity>> GetPorudzbineZaKorisnikaAsync(string emailKorisnika)
+        {
+            // Pristupite Azure Storage tabeli za porudžbine
+            var porudzbine = await storageClient.GetPorudzbineZaKorisnika(emailKorisnika);
+
+            return porudzbine;
+        }
+
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -70,7 +88,7 @@ namespace OrderStatefullService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new ServiceReplicaListener[0];
+            return this.CreateServiceRemotingReplicaListeners();
         }
 
         /// <summary>

@@ -128,7 +128,7 @@ namespace Client.Controllers
                 {
                     HttpContext.Session.SetString("KorisnikEmail", korisnik.Email);
 
-                    return RedirectToAction("UpdateUser", korisnik);
+                    return RedirectToAction("ShowProducts", "Proizvod");
                 }
                 else
                 {

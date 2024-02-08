@@ -1,10 +1,53 @@
 ﻿@model IEnumerable<Common.Proizvod>
 
+<style>
+    .alert {
+        padding: 20px;
+        background-color: forestgreen; /* Boja pozadine */
+        color: white; /* Boja teksta */
+        position: fixed;
+        top: 50%; /* Postavljamo na polovinu visine ekrana */
+        left: 50%; /* Postavljamo na polovinu širine ekrana */
+        transform: translate(-50%, -50%); /* Centriranje po vertikali i horizontali */
+        z-index: 9999; /* Postavljamo iznad ostalih elemenata */
+        transition: transform 0.5s ease-in-out; /* Animacija */
+    }
+
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+
+    /* Dodatni stilovi */
+    .alert.show {
+        transform: translateY(-100%);
+    }
+</style>
+
 <form action="/Proizvod/ShowProducts">
     <button type="submit">Vrati se na proizvode</button>
 </form>
 
 <h2>Korpa</h2>
+@if (!string.IsNullOrEmpty(TempData["obavjestenje"]?.ToString()))
+{
+    <div class="alert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        @TempData["obavjestenje"]
+    </div>
+}
+
 @if (Model.Count() > 0)
 {
     <table class="table">
@@ -17,9 +60,16 @@
             </tr>
         </thead>
         <tbody>
+            @{
+                double ukupnaCijenaSvihProizvoda = 0;
+            }
             @foreach (var proizvod in Model)
             {
+                double ukupnaCijenaProizvoda = proizvod.CijenaProizvoda * proizvod.KolicinaProizvoda;
+                ukupnaCijenaSvihProizvoda += ukupnaCijenaProizvoda;
+
                 <tr>
+                   
                     <td>@proizvod.NazivProizvoda</td>
                     <td>@proizvod.KolicinaProizvoda</td>
                     <td>@proizvod.CijenaProizvoda</td>
@@ -35,8 +85,19 @@
     </table>
 
     <form method="post" action="/Order/Naruci">
+        <h2>Odaberi način plaćanja</h2>
+        <input type="radio" id="paypal" name="nacinPlacanja" value="PayPal">
+        <label for="paypal">PayPal</label><br>
+
+        <input type="radio" id="pouzecem" name="nacinPlacanja" value="PlacanjePouzecem">
+        <label for="pouzecem">Plaćanje pouzećem</label><br>
+
+        <h3>Ukupna cijena: @ukupnaCijenaSvihProizvoda</h3>
+        <input type="hidden" id="ukupnaCijena" name="ukupnaCijena" value="@ukupnaCijenaSvihProizvoda" readonly>
+
         <button type="submit">Naruči</button>
     </form>
+
 
 }
 else

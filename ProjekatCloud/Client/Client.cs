@@ -102,7 +102,7 @@ namespace Client
                         // Dodaj middleware za redirekciju sa /swagger/index.html na /
                         app.Use(async (context, next) =>
                         {
-                            if (context.Request.Path.StartsWithSegments("/swagger/index.html"))
+                            if (context.Request.Path.StartsWithSegments("/swagger"))
                             {
                                 context.Response.Redirect("/");
                                 return;

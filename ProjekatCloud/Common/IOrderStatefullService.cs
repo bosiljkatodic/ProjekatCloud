@@ -13,6 +13,9 @@ namespace Common
     public interface IOrderStatefullService : IService
     {
         [OperationContract]
-        public Task<bool> DodajUKorpu(int productId);
+        public Task<bool> KreirajPorudzbinu(string emailKorisnika,IEnumerable<Proizvod> proizvodi, string nacinPlacanja, double ukupnaCijena);
+        [OperationContract]
+        public Task<IEnumerable<PorudzbinaEntity>> GetPorudzbineZaKorisnikaAsync(string emailKorisnika);
+
     }
 }

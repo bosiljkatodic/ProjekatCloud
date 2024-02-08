@@ -406,6 +406,42 @@ namespace ProductStatefullService
             }
         }
 
+        public async Task<bool> IsprazniKorpuPriPorudzbini()
+        {
+            try
+            {
+                var korpaDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<int, Proizvod>>("korpaDictionary");
+
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    // Dobij sve stavke iz korpe
+                    var korpaEnumerable = await korpaDictionary.CreateEnumerableAsync(tx);
+
+                    // Iteriraj kroz sve stavke korpe
+                    using (var enumerator = korpaEnumerable.GetAsyncEnumerator())
+                    {
+                        while (await enumerator.MoveNextAsync(default))
+                        {
+                            var productId = enumerator.Current.Key;
+
+                            // Ukloni proizvod iz korpe
+                            await korpaDictionary.TryRemoveAsync(tx, productId);
+                        }
+                    }
+
+                    // Potvrdi transakciju
+                    await tx.CommitAsync();
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Logiranje greške ako se dogodi
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error clearing cart: {ex.Message}");
+                throw; // Propagiranje izuzetka dalje
+            }
+        }
 
 
         /// <summary>
