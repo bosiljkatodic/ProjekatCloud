@@ -1,5 +1,9 @@
 ﻿@model IEnumerable<Common.Proizvod>
 
+<script src="https://www.paypal.com/sdk/js?client-id=AdtGqov4ixPRE9cc3L0va_dICNBN9Z6yekyoCG8ovm-u1jNoYrQ3JRnm-aJyiA7mabFyiTCM-wA2f2IL&currency=USD"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
 <style>
     .alert {
         padding: 20px;
@@ -86,8 +90,7 @@
 
     <form method="post" action="/Order/Naruci">
         <h2>Odaberi način plaćanja</h2>
-        <input type="radio" id="paypal" name="nacinPlacanja" value="PayPal">
-        <label for="paypal">PayPal</label><br>
+        <div id="paypal-button-container"></div>
 
         <input type="radio" id="pouzecem" name="nacinPlacanja" value="PlacanjePouzecem">
         <label for="pouzecem">Plaćanje pouzećem</label><br>
@@ -97,6 +100,41 @@
 
         <button type="submit">Naruči</button>
     </form>
+
+    <script>
+        paypal.Buttons({
+            createOrder: function (data, actions) {
+                // Funkcija koja kreira narudžbinu
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '10.00' // Cena koju kupac plaća
+                        }
+                    }]
+                });
+            },
+            onApprove: function (data, actions) {
+                console.log('Transakcija odobrena!', data);
+                // AJAX poziv za slanje podataka na server
+                $.ajax({
+                    type: 'POST',
+                    url: '/Order/Naruci',
+                    data: {
+                        nacinPlacanja: 'PayPal',
+                        ukupnaCijena: @ukupnaCijenaSvihProizvoda
+                    },
+                    success: function (response) {
+                        // Ovdje možete obraditi odgovor sa servera ako je potrebno
+                        console.log('Narudžba uspješno poslana!', response);
+                    },
+                    error: function (xhr, status, error) {
+                        // Ovdje možete obraditi grešku ako dođe do problema sa AJAX pozivom
+                        console.error('Greška prilikom slanja narudžbe:', error);
+                    }
+                });
+            }
+        }).render('#paypal-button-container');
+    </script>
 
 
 }

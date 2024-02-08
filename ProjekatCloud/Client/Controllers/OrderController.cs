@@ -93,7 +93,7 @@ namespace Client.Controllers
                     // Nakon što je porudžbina uspješno kreirana
                     ViewBag.SuccessMessage = "Vaša porudžbina je uspješno kreirana!";
                     TempData["obavjestenje"] = "Uspješno ste kreirali porudžbinu!";
-                    return RedirectToAction("ShowKorpa");
+                    return RedirectToAction("ShowProducts", "Proizvod");
                 }
                 else
                 {
